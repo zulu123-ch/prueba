@@ -12,21 +12,14 @@ tickers = {
     'Tasas de Interés': ['^TNX', '^TYX']
 }
 
-# Obtener datos actuales y calcular variación porcentual diaria
-def get_data(tickers_list):
-    data = yf.download(tickers=tickers_list, period='2d')['Close']
-    returns = ((data.iloc[-1] / data.iloc[-2] - 1) * 100).round(2)
-    valores_actuales = data.iloc[-1]
-    return pd.DataFrame({'Valor': valores_actuales, 'Var%': returns})
-
 # Mostrar cada categoría en Streamlit
 for categoria, tickers_lista in tickers.items():
     st.header(categoria)
-    data = yf.download(tickers_lista, period='5d')
+    data = yf.download(tickers_lista, period='5d')['Close']
     if not data.empty:
-        ultimos_valores = data['Close'].iloc[-1]
-        variacion = ((data['Close'].iloc[-1] / data['Close'].iloc[-2] - 1) * 100).round(2)
-        df_categoria = pd.DataFrame({'Valor': valores_actuales, 'Var%': variacion_porcentual})
+        ultimos_valores = data.iloc[-1]
+        variacion = ((data.iloc[-1] / data.iloc[-2] - 1) * 100).round(2)
+        df_categoria = pd.DataFrame({'Valor': ultimos_valores, 'Var%': variacion})
         st.dataframe(df_categoria.style.format({'Valor': '{:,.2f}', 'Var%': '{:+.2f}%'}))
     else:
         st.write("Datos no disponibles actualmente.")
