@@ -2,32 +2,31 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 
-st.title("Rentabilidades del S&P, NASDAQ y VFLO")
+st.title("Resumen de Mercados")
 
-# Descargar datos desde Yahoo Finance
-tickers = {'S&P 500': '^GSPC', 'NASDAQ': '^IXIC', 'VFLO ETF': 'VFLO'}
-periods = {'1d': 1, '1w': 7, '1m': 30, '3m': 90, '1y': 365, '3y': 365*3, '5y': 365*5, '10y': 365*10}
+# Definir tickers para cada categoría
+tickers = {
+    'Monedas': ['CLP=X', 'UF=X', 'BRL=X', 'ARS=X', 'PEN=X', 'MXN=X', 'AUDUSD=X', 'CAD=X', 'GBPUSD=X', 'JPY=X', 'CNY=X'],
+    'Commodities': ['HG=F', 'CL=F', 'NG=F', 'GC=F'],
+    'Mercados': ['^IPSA', '^GSPC', '^IXIC', '^DJI', '^FTSE', '^GDAXI', '^N225', '000300.SS'],
+    'Tasas de Interés': ['^TNX', '^TYX']
+}
 
-data = {}
-for name, ticker in tickers.items():
-    ticker_data = yf.Ticker(ticker)
-    returns = {}
-    for label, days in periods.items():
-        hist = ticker_data.history(period=f'{days+1}d')
-        if len(hist) > 1:
-            total_return = hist['Close'][-1] / hist.iloc[0]['Close'] - 1
-            if label in ['3y', '5y', '10y']:
-                annualized_return = (1 + total_return) ** (1/(days/365)) - 1
-                returns[label] = annualized_return * 100
-            else:
-                returns[label] = total_return * 100
-        else:
-            returns[label] = None
-    data[name] = returns
+# Obtener datos actuales y calcular variación porcentual diaria
+def get_data(tickers_list):
+    data = yf.download(tickers=tickers_list, period='2d')['Close']
+    returns = ((data.iloc[-1] / data.iloc[-2] - 1) * 100).round(2)
+    valores_actuales = data.iloc[-1]
+    return pd.DataFrame({'Valor': valores_actuales, 'Var%': returns})
 
-# Convertir a DataFrame
-df = pd.DataFrame(data).T
-
-# Mostrar resultados
-st.write('### Rentabilidades S&P 500, NASDAQ y VFLO ETF')
-st.dataframe(df.style.format("{:.2f}%"))
+# Mostrar cada categoría en Streamlit
+for categoria, tickers_lista in tickers.items():
+    st.header(categoria)
+    data = yf.download(tickers_lista, period='5d')
+    if not data.empty:
+        ultimos_valores = data['Close'].iloc[-1]
+        variacion = ((data['Close'].iloc[-1] / data['Close'].iloc[-2] - 1) * 100).round(2)
+        df_categoria = pd.DataFrame({'Valor': valores_actuales, 'Var%': variacion_porcentual})
+        st.dataframe(df_categoria.style.format({'Valor': '{:,.2f}', 'Var%': '{:+.2f}%'}))
+    else:
+        st.write("Datos no disponibles actualmente.")
