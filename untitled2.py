@@ -32,5 +32,4 @@ st.dataframe(df, hide_index=True)
 # Totales
 st.write(f"**Ingreso Total Proyectado:** USD {sum(ingresos):,.2f}")
 st.write(f"**Costo Total Proyectado:** USD {sum(costos):,.2f}")
-st.write(f"**Margen Bruto Total Proyectado:** USD {sum(margen_bruto):
-
+st.write(f"**Margen Bruto Total Proyectado:** USD {sum(margen_bruto):,.2f}")
